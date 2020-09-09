@@ -12,9 +12,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer
 from sklearn.svm import SVC
 
-print("HI I am testing")
-
-
 # Read in data files
 iris_df = pd.read_csv("D:/SDSU BDA/BDA 696/HW1/HW1-Data/iris.data.csv")
 # iris_df1 = pd.read_csv("D:/SDSU BDA/BDA 696/HW1/HW1-Data/iris.names.csv")
