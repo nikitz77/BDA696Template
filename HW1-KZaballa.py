@@ -1,13 +1,11 @@
 # BDA 696 - Karenina Zaballa
 # Week 1 - HW1
-
 # installing libraries as needed
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
-# this package may not be needed.
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer
