@@ -7,11 +7,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
-# this package may not be needed.
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer
 from sklearn.svm import SVC
+
+print("HI I am testing")
+
 
 # Read in data files
 iris_df = pd.read_csv("D:/SDSU BDA/BDA 696/HW1/HW1-Data/iris.data.csv")
