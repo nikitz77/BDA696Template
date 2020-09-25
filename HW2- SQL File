@@ -1,3 +1,62 @@
-' BDA 696 - Karenina Zaballa
-Week 1 - HW2'
+/*
+ BDA 696 - Karenina Zaballa
+-- BDA 696 HW 2 --
+
+
+INSTRUCTIONS:
+
+GOAL: Calculate the batting average using SQL queries for every player
+
+ 1. Start with one player
+ 		Do Annual
+ 		Do Historic
+ 		Rolling (over last 100 days) ? - Look at the last 100 days that player was in prior to this game
+ 2. Apply above to all players
+   Store all these results in their own tables
+*/
+
+-- This query pulls out the number of years that players played and gives me the batting average by year
+-- Both Historic and Annual metrics are on the first query/table.
+-- -- PLEASE NOTE: Zero''s were not taken out because you can be at bat and still strike out,
+-- -- meaning a zero is possible for the time the player is at bat. z
+
+USE baseball_db
+
+create or replace table AnnBatAvg (batter int) Engine = myISAM
+select batter_counts.batter,
+	year(game.local_date) as ann_year
+	, sum(hit) / sum(atBat) as ann_battingAvg
+	from batter_counts
+	inner join game
+	 on batter_counts.game_id  = game.game_id
+	 inner join battersingame on batter_counts.batter = battersingame.batter
+	  	 and game.game_id  = battersingame.game_id
+	where game.game_id = batter_counts.game_id -- and batter_counts.batter = ''407886''
+	group by batter_counts.batter, year(game.local_date)
+
+
+select * from AnnBatAvg
+
+-- Batting Average for the last 100 days --
+-- basically it pulls the last day they palyed and goes back 100 days
+-- -- PLEASE NOTE: Zero''s were not taken out because you can be at bat and still strike out,
+-- -- meaning a zero is possible for the time the player is at bat.
+
+
+create or replace table RollBatAvg (batter int) Engine = myISAM
+select batter_counts.batter, month(game.local_date) as int_Month, year(game.local_date) as int_Year,
+	 sum(hit) / sum(atBat) as battingAvg_Last100Days
+	from batter_counts
+	inner join game
+	 on batter_counts.game_id  = game.game_id
+	 inner join battersingame on batter_counts.batter = battersingame.batter
+	  	 and game.game_id  = battersingame.game_id
+	where game.game_id = batter_counts.game_id  -- and batter_counts.batter = ''407886''
+	 and
+	 	cast(game.local_date as date)  <= 	cast(DATE_ADD(local_date, INTERVAL 100 DAY) as date) and cast(game.local_date as date)
+	 group by batter_counts.batter
+
+select * from RollBatAvg
+
+-- -- join game ID join through batter column
 
