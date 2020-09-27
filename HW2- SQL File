@@ -51,7 +51,7 @@ select batter_counts.batter,
 select * from Annual_Batting_Avg
 
 /* 3. Batting Average for the last 100 days
-I need a temp table to combine my Rolling Average Table to */
+I need a temp table to combine my Rolling Average Table to itself*/
 
 create or replace table ba_temp as
 select game.game_id, batter_counts.batter, batter_counts.Hit, batter_counts.atBat, game.local_date
