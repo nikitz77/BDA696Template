@@ -15,7 +15,7 @@ GOAL: Calculate the batting average using SQL queries for every player
 */
 
 
-use baseball_db
+use baseball_db;
 
 /* 1. Historical  Batting Average
 do without constraint of year for historical batting average*/
@@ -28,10 +28,10 @@ select batter_counts.batter, sum(hit) / sum(atBat) as HistBatAvg
 	 inner join battersingame on batter_counts.batter = battersingame.batter
 	  	 and game.game_id  = battersingame.game_id
 	where game.game_id = batter_counts.game_id
-	group by batter_counts.batter
+	group by batter_counts.batter;
 
 /*View Historical Batting Average Table*/
-select * from Historical_Batting_Average
+select * from Historical_Batting_Average;
 
 /* 2. Annual Batting Average
 do without constraint of year for historical batting average*/
@@ -46,9 +46,10 @@ select batter_counts.batter,
 	inner join battersingame on batter_counts.batter = battersingame.batter
 	  	 and game.game_id  = battersingame.game_id
 	where game.game_id = batter_counts.game_id
-	group by batter_counts.batter, year(game.local_date)
+	group by batter_counts.batter, year(game.local_date);
+
 /*View Historical Batting Average Table*/
-select * from Annual_Batting_Avg
+select * from Annual_Batting_Avg;
 
 /* 3. Batting Average for the last 100 days
 I need a temp table to combine my Rolling Average Table to itself*/
@@ -57,7 +58,7 @@ create or replace table ba_temp as
 select game.game_id, batter_counts.batter, batter_counts.Hit, batter_counts.atBat, game.local_date
 from batter_counts
 join game
-on   batter_counts.game_id = game.game_id ;
+on   batter_counts.game_id = game.game_id;
 
 /*View the temp table*/
 select * from ba_temp;
@@ -74,7 +75,7 @@ where ba1.game_id = 100      -- comment out this line to get the rolling batting
 group by ba1.game_id, ba1.batter,ba1.local_date;
 
 /*View the final table*/
-select * from Rolling_100Day_Batting_Avg
+select * from Rolling_100Day_Batting_Avg;
 
 
 
