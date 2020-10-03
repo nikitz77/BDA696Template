@@ -1,10 +1,13 @@
+# Setup Spark
+
+
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.master("local[*]").getOrCreate()
 
 database = "baseball_db"
 port = "3306"
-user = "root"
+user = "root"  # pragma: allowlist secret
 password = "x11docker"  # pragma: allowlist secret
 
 df = (
@@ -13,7 +16,7 @@ df = (
         url=f"jdbc:mysql://localhost:{port}/{database}",
         driver="com.mysql.cj.jdbc.Driver",
         dbtable="batter_counts",
-        user=user,
+        user=user,  # pragma: allowlist secret
         password=password,  # pragma: allowlist secret
     )
     .load()

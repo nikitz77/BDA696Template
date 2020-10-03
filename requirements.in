@@ -5,3 +5,4 @@ plotly
 mysql
 sqlalchemy
 pyspark
+pyspark-stubs
