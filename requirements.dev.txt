@@ -86,7 +86,7 @@ urllib3==1.25.10          # via requests
 virtualenv==20.0.32       # via pre-commit
 wcwidth==0.2.5            # via prompt-toolkit
 webencodings==0.5.1       # via bleach
-zipp==3.2.0               # via importlib-metadata
+zipp==3.3.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
