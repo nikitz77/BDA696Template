@@ -1,10 +1,8 @@
+mysql
 numpy
 pandas
-sklearn
 plotly
-mysql
-sqlalchemy
 pyspark
 pyspark-stubs
-mariadb
-matplotlib
+sklearn
+sqlalchemy
