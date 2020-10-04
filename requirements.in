@@ -6,3 +6,5 @@ mysql
 sqlalchemy
 pyspark
 pyspark-stubs
+mariadb
+matplotlib
