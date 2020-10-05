@@ -19,11 +19,11 @@ from Transformer_100_Day_AVG import R_AVG_100
 def main():
     spark = SparkSession.builder.master("local[*]").getOrCreate()
 
-    database = "baseball_db"  # This may be named differently, i.e. "baseball"
+    database = "baseball"  # This may be named differently, i.e. "baseball"
     port = "3306"
     # input login info here
-    user = " "  # pragma: allowlist secret
-    password = " "  # pragma: allowlist secret
+    user = "root"  # pragma: allowlist secret
+    password = "x11docker"  # pragma: allowlist secret
     extras = (
         "useUnicode=true&useJDBCCompliantTimezoneShift=true"
         "+&useLegacyDatetimeCode=false&serverTimezone=PST"
@@ -47,6 +47,7 @@ def main():
     df.createOrReplaceTempView("batters_counts")
     df.persist(StorageLevel.DISK_ONLY)
 
+    print("Making temp table: ba_temp\n")
     df1 = (
         spark.read.format("jdbc")
         .options(
@@ -67,29 +68,47 @@ def main():
     df1.createOrReplaceTempView("ba_temp")
     df1.persist(StorageLevel.DISK_ONLY)
 
-    df1.createOrReplaceTempView("ba_temp")
-
     # Paste ba_temp onto itself to set up for calculations
+    # This was my previous attempt to make tables work,
+    # but there was a casting issue on the date here
+
+    # To explore later, unix_timestamp library: https://spark.apache.org/docs/latest/api
+    # /python/pyspark.sql.html#pyspark.sql.functions.unix_timestamp
+
+    # SELECT ba1.batter, ba1.game_id, SUM(ba2.Hit) AS Hit, \
+    # SUM(ba2.atBat) AS atBat, ba2.local_date \
+    # FROM   ba_temp ba1 \
+    # JOIN   ba_temp ba2 \
+    # ON ba1.batter = ba2.batter \
+    # AND ba2.local_date > DATE_SUB(ba1.local_date, INTERVAL 100 DAY) \
+    # AND ba1.local_date > ba2.local_date \
+    # GROUP BY ba1.game_id, ba1.batter,ba1.local_date """
+
+    print("Prepping tables for 100 Day Rolling Average\n")
+
     tableprep = spark.sql(
-        """SELECT ba1.batter, ba1.game_id, SUM(ba2.Hit) AS Hit, \
-            SUM(ba2.atBat) AS atBat, ba2.local_date \
+        """(SELECT SUM(ba2.Hit) AS TotalHits, SUM(ba2.atBat) AS TotalAtBat, \
+            ba1.batter, ba1.game_id \
             FROM   ba_temp ba1 \
             JOIN   ba_temp ba2 \
-            ON ba1.batter = ba2.batter \
-            AND ba2.local_date > DATE_SUB(ba1.local_date, INTERVAL 100 DAY) \
-            AND ba1.local_date > ba2.local_date \
-            GROUP BY ba1.game_id, ba1.batter,ba1.local_date """
+            ON ba2.batter = ba1.batter AND \
+            ba2.local_date BETWEEN DATE_SUB(ba1.local_date,100) AND \
+            DATE_SUB(ba1.local_date, 1)\
+            GROUP BY ba1.game_id, ba1.batter )"""
     )
+    # found out DATE_SUB(loacl_date, 1) acts like a placeholder or count for the dates
+    tableprep.show()
 
+    print("CALCULATING 100 Day Rolling Average\n")
     # set up your input columns for calculation
     roll_avg_100 = R_AVG_100(
-        inputCols=["Hit", "AtBat"], outputCol="Rolling_Bat_AVG_100"
+        inputCols=["TotalHits", "TotalAtBat"], outputCol="Rolling_Bat_AVG_100"
     )
     # this step calls your function from
     # Transformer_100_Day_AVG.py and does your calculation
     rolling = roll_avg_100.transform(tableprep)
-    print("Showing 100 Day Rolling Average for each batter\n")
     rolling.show()
+    print("Showing 100 Day Rolling Average for each batter\n")
 
 
 if __name__ == "__main__":
