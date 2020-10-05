@@ -63,6 +63,8 @@ def main():
     df1.createOrReplaceTempView("ba_temp")
     df1.persist(StorageLevel.DISK_ONLY)
 
+    df1.createOrReplaceTempView("ba_temp")
+
     # Paste ba_temp onto itself to set up for calculations
     tableprep = spark.sql(
         """SELECT ba1.batter, ba1.game_id, SUM(ba2.Hit) AS Hit_Sum, \
