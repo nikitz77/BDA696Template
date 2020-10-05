@@ -32,6 +32,6 @@ class R_AVG_100(
         output_col = self.getOutputCol()
         # This is where the rolling average calculation actually occurs
         dataset = dataset.withColumn(
-            output_col, dataset[input_cols[0]] / dataset[input_cols[1]]
+            output_col, dataset[input_cols[1]] / dataset[input_cols[2]]
         )
         return dataset

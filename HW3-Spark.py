@@ -67,8 +67,8 @@ def main():
 
     # Paste ba_temp onto itself to set up for calculations
     tableprep = spark.sql(
-        """SELECT ba1.batter, ba1.game_id, SUM(ba2.Hit) AS Hit_Sum, \
-            SUM(ba2.atBat) AS AtBat_Sum, ba2.local_date \
+        """SELECT ba1.batter, ba1.game_id, SUM(ba2.Hit) AS Hit, \
+            SUM(ba2.atBat) AS atBat, ba2.local_date \
             FROM   ba_temp ba1 \
             JOIN   ba_temp ba2 \
             ON ba1.batter = ba2.batter \
@@ -79,7 +79,7 @@ def main():
 
     # set up your input columns for calculation
     roll_avg_100 = R_AVG_100(
-        inputCols=["Hit_Sum", "AtBat_Sum"], outputCol="Rolling_Bat_AVG_100"
+        inputCols=["Hit", "AtBat"], outputCol="Rolling_Bat_AVG_100"
     )
     # this step calls your function from
     # Transformer_100_Day_AVG.py and does your calculation
