@@ -24,12 +24,16 @@ def main():
     # input login info here
     user = " "  # pragma: allowlist secret
     password = " "  # pragma: allowlist secret
+    extras = (
+        "useUnicode=true&useJDBCCompliantTimezoneShift=true"
+        "+&useLegacyDatetimeCode=false&serverTimezone=PST"
+    )
 
     # STANDARD TABLE
     df = (
         spark.read.format("jdbc")
         .options(
-            url=f"jdbc:mysql://localhost:{port}/{database}",
+            url=f"jdbc:mysql://localhost:{port}/{database}?{extras}",
             driver="com.mysql.cj.jdbc.Driver",
             dbtable="batter_counts",
             user=user,  # pragma: allowlist secret
@@ -46,7 +50,7 @@ def main():
     df1 = (
         spark.read.format("jdbc")
         .options(
-            url=f"jdbc:mysql://localhost:{port}/{database}",
+            url=f"jdbc:mysql://localhost:{port}/{database}?{extras}",
             driver="com.mysql.cj.jdbc.Driver",
             dbtable="(SELECT game.game_id, batter_counts.batter, \
                     batter_counts.Hit, batter_counts.atBat, game.local_date \
