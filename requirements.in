@@ -1,6 +1,8 @@
+mysql
 numpy
 pandas
-sklearn
 plotly
-mysql
+pyspark
+pyspark-stubs
+sklearn
 sqlalchemy

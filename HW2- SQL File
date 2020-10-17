@@ -1,0 +1,82 @@
+/*-- BDA 696 HW 2 --
+ * Karenina Zaballa
+
+
+INSTRUCTIONS:
+
+GOAL: Calculate the batting average using SQL queries for every player
+
+ 1. Start with one player
+ 		Do Annual
+ 		Do Historic
+ 		Rolling (over last 100 days) ? - Look at the last 100 days that player was in prior to this game
+ 2. Apply above to all players
+   Store all these results in their own tables
+*/
+
+
+use baseball_db;
+
+/* 1. Historical  Batting Average
+do without constraint of year for historical batting average*/
+
+create or replace table Historical_Batting_Average (batter int) Engine = myISAM as
+select batter_counts.batter, sum(hit) / sum(atBat) as HistBatAvg
+	from batter_counts
+	inner join game
+	 on batter_counts.game_id  = game.game_id
+	 inner join battersingame on batter_counts.batter = battersingame.batter
+	  	 and game.game_id  = battersingame.game_id
+	where game.game_id = batter_counts.game_id
+	group by batter_counts.batter;
+
+/*View Historical Batting Average Table*/
+select * from Historical_Batting_Average;
+
+/* 2. Annual Batting Average
+do without constraint of year for historical batting average*/
+
+create or replace table Annual_Batting_Avg (batter int) Engine = myISAM as
+select batter_counts.batter,
+	year(game.local_date) as int_Date,
+	sum(hit) / sum(atBat) as AnnBatAvg
+	from batter_counts
+	inner join game
+	 on batter_counts.game_id  = game.game_id
+	inner join battersingame on batter_counts.batter = battersingame.batter
+	  	 and game.game_id  = battersingame.game_id
+	where game.game_id = batter_counts.game_id
+	group by batter_counts.batter, year(game.local_date);
+
+/*View Historical Batting Average Table*/
+select * from Annual_Batting_Avg;
+
+/* 3. Batting Average for the last 100 days
+I need a temp table to combine my Rolling Average Table to itself*/
+
+create or replace table ba_temp as
+select game.game_id, batter_counts.batter, batter_counts.Hit, batter_counts.atBat, game.local_date
+from batter_counts
+join game
+on   batter_counts.game_id = game.game_id;
+
+/*View the temp table*/
+select * from ba_temp;
+
+
+/*Stick the temp table with the calculated column or batting average that you had.*/
+create or replace table Rolling_100Day_Batting_Avg as
+select ba1.batter, ba1.game_id, sum(ba2.Hit)/sum(ba2.atBat + 0.00001) as Batting_Average, ba2.local_date
+from   ba_temp ba1
+join   ba_temp ba2
+on ba1.batter = ba2.batter
+and ba2.local_date > date_sub(ba1.local_date, interval 100 day) and ba1.local_date > ba2.local_date
+where ba1.game_id = 100      -- comment out this line to get the rolling batting average for all the players across all games
+group by ba1.game_id, ba1.batter,ba1.local_date;
+
+/*View the final table*/
+select * from Rolling_100Day_Batting_Avg;
+
+
+
+
