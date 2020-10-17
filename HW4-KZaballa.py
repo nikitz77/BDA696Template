@@ -12,6 +12,8 @@ import pandas as pd
 import statsmodels.api
 from plotly import express as px
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
 
 # REFERENCES:
 # Logistic Regression -
@@ -22,8 +24,20 @@ from sklearn.ensemble import RandomForestClassifier
 # regression-in-python-3d3f8f06bf8
 
 
-def boolean_processing(predictor, response):
+def boolean_processing(predict_df, response):
     # fill in with logistic regression
+    for idx, column in enumerate(predict_df.T):
+        if (np.dtype(predict_df[idx]) == str) or (np.dtype(predict_df[idx]) == bool):
+            print("This variable is categorical")
+        elif (np.dtype(predict_df[idx]) == int) or (np.dtype(predict_df[idx]) == float):
+            print("This variable is continuous")
+        else:
+            print("This variable is ", np.dtype(predict_df[idx]))
+    logreg = LogisticRegression()
+    rfe = RFE(logreg, predict_df.columns.size)
+    rfe = rfe.fit(predict_df, response.values.ravel())
+    print(rfe.support_)
+    print(rfe.ranking_)
     return print("boolean processing")
 
 
