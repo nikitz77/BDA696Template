@@ -19,6 +19,7 @@ patsy==0.5.1              # via ggplot, statsmodels
 pillow==7.2.0             # via matplotlib
 plotly==4.11.0            # via -r requirements.in
 py4j==0.10.9              # via pyspark
+pygments==2.7.1           # via -r requirements.in
 pyparsing==2.4.7          # via matplotlib
 pyspark-stubs==3.0.0.post1  # via -r requirements.in
 pyspark==3.0.1            # via -r requirements.in, pyspark-stubs

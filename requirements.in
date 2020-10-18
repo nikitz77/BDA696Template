@@ -7,3 +7,4 @@ pyspark-stubs
 sklearn
 sqlalchemy
 ggplot
+pygments
