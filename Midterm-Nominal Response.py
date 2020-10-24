@@ -325,38 +325,6 @@ def main():
             rank_unweighted_single.append(unweighted_score)
             rank_weighted_single.append(weighted_score)
 
-    # Defining the dataframe we want to display on our HTML page
-    # if not os.path.exists("~/plots"):
-    #    # make directories for plots
-    #     os.makedirs("~/plots")
-    # file_path = "~/plots/"
-    #
-    # result = pd.DataFrame()
-    # result["Variable"] = X.columns
-    #
-    # z_or_t_score = []
-    # p_value = []
-    # m_plot = []
-    # cat_con = []
-    # file = []
-    # mean_unweighted = []
-    # mean_weighted = []
-    # msd_plot = []
-    #
-    #
-    # result["cat_con"] = cat_con
-    # result["t-value"] = z_or_t_score
-    # result["p-value"] = p_value
-    # result["m-plot"] = m_plot
-    # result["graphs"] = file
-    # result["Variable_importance"] = importance
-    # result["mean_unweighted"] = mean_unweighted
-    # result["mean_weighted"] = mean_weighted
-    # result["msd_plot"] = msd_plot
-    #
-    # print(result)
-    # result.to_html("KZaballa_Assignment4.html", render_links=True, escape=False)
-
 
 if __name__ == "__main__":
     sys.exit(main())
