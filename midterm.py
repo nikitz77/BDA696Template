@@ -12,7 +12,19 @@ import seaborn as sns
 from scipy import stats
 
 
-def data_prep(df, response_col):
+def nominal_nominal(x, y):
+    confusion_matrix = pd.crosstab(x, y)
+    chi2 = stats.chi2_contingency(confusion_matrix)[0]
+    n = confusion_matrix.sum().sum()
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
+    rcorr = r - ((r - 1) ** 2) / (n - 1)
+    kcorr = k - ((k - 1) ** 2) / (n - 1)
+    return np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+
+
+def preprocessing(df, response_col):
     # drop empty columns
     df.dropna(axis=1, how="all", inplace=True)
 
@@ -23,13 +35,13 @@ def data_prep(df, response_col):
     nominal_thresh = 6
 
     # separate predictors and response
-    predictors = df.drop(response_col, axis=1)
-    #response = df[response_col]
+    # predictors = df.drop(response_col, axis=1)
+    # response = df[response_col]
 
     # determine the response type
-    response_type = "cont"
-    if len(response.unique()) == 2:
-        response_type = "bool"
+    # response_type = "cont"
+    # if len(response.unique()) == 2:
+    #     response_type = "bool"
 
     # separate predictors into categorical and continuous features
     df_cat = df.loc[:, df.dtypes == object]
@@ -65,80 +77,7 @@ def fill_na(df):
         return np.array([value if value is not None else 0 for value in df])
 
 
-def cat_correlation(x, y, bias_correction=True, tschuprow=False):
-    """
-    Calculates correlation statistic for categorical-categorical association.
-    The two measures supported are:
-    1. Cramer'V ( default )
-    2. Tschuprow'T
-
-    SOURCES:
-    1.) CODE: https://github.com/MavericksDS/pycorr
-    2.) Used logic from:
-        https://stackoverflow.com/questions/20892799/using-pandas-calculate-cram%C3%A9rs-coefficient-matrix
-        to ignore yates correction factor on 2x2
-    3.) Haven't validated Tschuprow
-
-    Bias correction and formula's taken from : https://www.researchgate.net/publication/
-    270277061_A_bias-correction_for_Cramer's_V_and_Tschuprow's_T
-
-    Wikipedia for Cramer's V: https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
-    Wikipedia for Tschuprow' T: https://en.wikipedia.org/wiki/Tschuprow%27s_T
-    Parameters:
-    -----------
-    x : list / ndarray / Pandas Series
-        A sequence of categorical measurements
-    y : list / NumPy ndarray / Pandas Series
-        A sequence of categorical measurements
-    bias_correction : Boolean, default = True
-    tschuprow : Boolean, default = False
-               For choosing Tschuprow as measure
-    Returns:
-    --------
-    float in the range of [0,1]
-    """
-    corr_coeff = np.nan
-    # try:
-    x, y = fill_na(x), fill_na(y)
-    crosstab_matrix = pd.crosstab(x, y)
-    n_observations = crosstab_matrix.sum().sum()
-
-    yates_correct = True
-    if bias_correction:
-        if crosstab_matrix.shape == (2, 2):
-            yates_correct = False
-
-    chi2, _, _, _ = stats.chi2_contingency(crosstab_matrix, correction=yates_correct)
-    phi2 = chi2 / n_observations
-
-    # r and c are number of categories of x and y
-    r, c = crosstab_matrix.shape
-    if bias_correction:
-        phi2_corrected = max(0, phi2 - ((r - 1) * (c - 1)) / (n_observations - 1))
-        r_corrected = r - ((r - 1) ** 2) / (n_observations - 1)
-        c_corrected = c - ((c - 1) ** 2) / (n_observations - 1)
-        if tschuprow:
-            corr_coeff = np.sqrt(
-                phi2_corrected / np.sqrt((r_corrected - 1) * (c_corrected - 1))
-            )
-            return corr_coeff
-        corr_coeff = np.sqrt(phi2_corrected / min((r_corrected - 1), (c_corrected - 1)))
-        return corr_coeff
-    if tschuprow:
-        corr_coeff = np.sqrt(phi2 / np.sqrt((r - 1) * (c - 1)))
-        return corr_coeff
-    corr_coeff = np.sqrt(phi2 / min((r - 1), (c - 1)))
-    return corr_coeff
-    # except Exception as ex:
-    #  print(ex)
-    # if tschuprow:
-    #  warnings.warn("Error calculating Tschuprow's T", RuntimeWarning)
-    # else:
-    #   warnings.warn("Error calculating Cramer's V", RuntimeWarning)
-    # return corr_coeff
-
-
-def bin_col_midterm(df_, col1, col2, response_col, bins=10):
+def binning(df_, col1, col2, response_col, bins=10):
     pop_mean = df_[response_col].mean()
     # df_[col1] = df_[col1].fillna(0)
     # df_[col2] = df_[col2].fillna(0)
@@ -163,10 +102,10 @@ def bin_col_midterm(df_, col1, col2, response_col, bins=10):
     mean_diff2 = df_.groupby("binned2").mean()[col2].sort_index() - pop_mean
     unweighted_score = (mean_diff1 ** 2).sum() + (mean_diff2 ** 2).sum()
 
-    #     print(mean_diff1)
-    #     print(mean_diff2)
+    print(mean_diff1)
+    print(mean_diff2)
 
-    #     # calculate weighted response mean
+    # calculate weighted response mean
     bin_prop1 = bin_cnt1 / df_.shape[0]
     bin_prop2 = bin_cnt2 / df_.shape[0]
     weighed_mean_diff1 = np.multiply(np.array(mean_diff1), np.array(bin_prop1)) ** 2
@@ -188,18 +127,6 @@ def bin_col_midterm(df_, col1, col2, response_col, bins=10):
     return unweighted_score, weighted_score
 
 
-def cramers_v2(x, y):
-    confusion_matrix = pd.crosstab(x, y)
-    chi2 = stats.chi2_contingency(confusion_matrix)[0]
-    n = confusion_matrix.sum().sum()
-    phi2 = chi2 / n
-    r, k = confusion_matrix.shape
-    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-    rcorr = r - ((r - 1) ** 2) / (n - 1)
-    kcorr = k - ((k - 1) ** 2) / (n - 1)
-    return np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
-
-
 def main():
     # read in Dataset here
     # must have continuous and categorical/nominal variables
@@ -209,7 +136,7 @@ def main():
 
     Y = df["response"]  # assign your response column here
     # must automatically assign your predictors
-    X = df.loc[:, df.columns != "response"]
+    # X = df.loc[:, df.columns != "response"]
 
     # for columns in X.columns:
     #    print(columns)
@@ -234,7 +161,7 @@ def main():
 
     print("prepping your data")
 
-    df_cont, df_cat = data_prep(df, "number_of_reviews")
+    df_cont, df_cat = preprocessing(df, Y)
     # data_prep(df, Y)
 
     # Generate list
@@ -250,7 +177,7 @@ def main():
             print("Do Cramers here")
             for i in range(len(df_cat.columns)):
                 print(i)
-                square_root = cramers_v2(df_cat.iloc[i], df_cat.iloc[i + 1])
+                square_root = nominal_nominal(df_cat.iloc[i], df_cat.iloc[i + 1])
                 print(square_root)
         else:
             print("You have no nominal/nominal variables")
@@ -265,8 +192,8 @@ def main():
         df_cat_nominal = df_cat.loc[:, df.dtypes != object]
 
         df_nominal_cnt = (df_cat_nominal.nunique() < nominal_thresh).reset_index()
-        nominal_1 = list(df_nominal_cnt.loc[df_nominal_cnt[0] == True]["index"])
-        nominal_2 = list(df_nominal_cnt.loc[df_nominal_cnt[0] == False]["index"])
+        nominal_1 = list(df_nominal_cnt.loc[df_nominal_cnt[0] is True]["index"])
+        nominal_2 = list(df_nominal_cnt.loc[df_nominal_cnt[0] is False]["index"])
 
         df_cat_nominal_less_six = df_cat_nominal[nominal_1]
         df_cat_nominal_plus_six = df_cat_nominal[nominal_2]
@@ -303,59 +230,27 @@ def main():
             col_corr_weighted = []
             for j in list(df_cont.columns):
                 print(i, j)
-                unweighted_score, weighted_score = bin_col_midterm(
-                    df_cont, i, j, response_col
-                )
+                unweighted_score, weighted_score = binning(df_cont, i, j, response_col)
                 col_corr_unweighted.append(unweighted_score)
                 col_corr_weighted.append(weighted_score)
             cont_cont_unweighted.append(col_corr_unweighted)
             cont_cont_weighted.append(col_corr_weighted)
-        corr_mtx_4a = pd.DataFrame(
+        corr_matrix_2 = pd.DataFrame(
             cont_cont_weighted, columns=df_cont.columns, index=df_cont.columns
         )
-        corr_mtx_4a
+        corr_matrix_2
 
-        sns.heatmap(corr_mtx_4a)
+        sns.heatmap(corr_matrix_2)
 
         rank_unweighted_single = []
         rank_weighted_single = []
         for j in len(df.columns):
             print(j)
-            unweighted_score, weighted_score = bin_col_midterm(df, j, j + 1, Y)
+            unweighted_score, weighted_score = binning(df, j, j + 1, Y)
             rank_unweighted_single.append(unweighted_score)
             rank_weighted_single.append(weighted_score)
 
-    # Defining the dataframe we want to display on our HTML page
-    # if not os.path.exists("~/plots"):
-    #    # make directories for plots
-    #     os.makedirs("~/plots")
-    # file_path = "~/plots/"
-    #
-    # result = pd.DataFrame()
-    # result["Variable"] = X.columns
-    #
-    # z_or_t_score = []
-    # p_value = []
-    # m_plot = []
-    # cat_con = []
-    # file = []
-    # mean_unweighted = []
-    # mean_weighted = []
-    # msd_plot = []
-    #
-    #
-    # result["cat_con"] = cat_con
-    # result["t-value"] = z_or_t_score
-    # result["p-value"] = p_value
-    # result["m-plot"] = m_plot
-    # result["graphs"] = file
-    # result["Variable_importance"] = importance
-    # result["mean_unweighted"] = mean_unweighted
-    # result["mean_weighted"] = mean_weighted
-    # result["msd_plot"] = msd_plot
-    #
-    # print(result)
-    # result.to_html("KZaballa_Assignment4.html", render_links=True, escape=False)
+        # Tables
 
 
 if __name__ == "__main__":
