@@ -10,11 +10,11 @@ cycler==0.10.0            # via ggplot, matplotlib
 ggplot==0.11.5            # via -r requirements.in
 joblib==0.17.0            # via scikit-learn
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.3.2         # via ggplot
+matplotlib==3.3.2         # via ggplot, seaborn
 mysql==0.0.2              # via -r requirements.in
 mysqlclient==2.0.1        # via mysql
-numpy==1.19.2             # via -r requirements.in, ggplot, matplotlib, pandas, patsy, scikit-learn, scipy, statsmodels
-pandas==1.1.2             # via -r requirements.in, ggplot, statsmodels
+numpy==1.19.2             # via -r requirements.in, ggplot, matplotlib, pandas, patsy, scikit-learn, scipy, seaborn, statsmodels
+pandas==1.1.2             # via -r requirements.in, ggplot, seaborn, statsmodels
 patsy==0.5.1              # via ggplot, statsmodels
 pillow==7.2.0             # via matplotlib
 plotly==4.11.0            # via -r requirements.in
@@ -27,7 +27,8 @@ python-dateutil==2.8.1    # via matplotlib, pandas
 pytz==2020.1              # via pandas
 retrying==1.3.3           # via plotly
 scikit-learn==0.23.2      # via sklearn
-scipy==1.5.2              # via ggplot, scikit-learn, statsmodels
+scipy==1.5.2              # via ggplot, scikit-learn, seaborn, statsmodels
+seaborn==0.11.0           # via -r requirements.in
 six==1.15.0               # via cycler, ggplot, patsy, plotly, python-dateutil, retrying
 sklearn==0.0              # via -r requirements.in
 sqlalchemy==1.3.19        # via -r requirements.in
